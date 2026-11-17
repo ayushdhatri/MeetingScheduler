@@ -8,10 +8,25 @@ public class Room {
 
     private RoomType type;
 
-    public Room(){
+    private int capacity;
+    public Room(RoomType type, int capacity){
         this.id = IdGenerator.generateId();
-
+        this.type = type;
+        this.capacity = capacity;
     }
+
+    public RoomType getType(){
+        return this.type;
+    }
+
+    public int getCapacity(){
+        return this.capacity;
+    }
+
+    public String getId(){
+        return this.id;
+    }
+
 
 
 }
