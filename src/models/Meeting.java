@@ -9,6 +9,8 @@ import java.util.UUID;
 public class Meeting {
     private final String id;
 
+    private String subject;
+
     private User organizer;
 
     private List<User> participants;
@@ -19,13 +21,14 @@ public class Meeting {
 
     private final Room room;
 
-    public Meeting(User organizer, List<User> participants, TimeSlot slot, Room room){
+    public Meeting(String subject, User organizer, List<User> participants, TimeSlot slot, Room room){
         this.id = IdGenerator.generateId();
         this.organizer = organizer;
         this.participants = participants;
         this.status = MeetingStatus.ACTIVE;
         this.slot = slot;
         this.room = room;
+        this.subject = subject;
     }
 
 
@@ -47,6 +50,14 @@ public class Meeting {
 
     public void addParticipants(User participant){
         this.participants.add(participant);
+    }
+
+    public String getSubject(){
+        return this.subject;
+    }
+
+    public TimeSlot getSlot(){
+        return this.slot;
     }
 
 
