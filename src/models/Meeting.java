@@ -6,6 +6,9 @@ import util.IdGenerator;
 import java.util.List;
 import java.util.UUID;
 
+/*
+Here we can use builder pattern to build the object of meeting class
+ */
 public class Meeting {
     private final String id;
 
@@ -58,6 +61,10 @@ public class Meeting {
 
     public TimeSlot getSlot(){
         return this.slot;
+    }
+
+    public Room getRoom(){
+        return this.room;
     }
 
 
