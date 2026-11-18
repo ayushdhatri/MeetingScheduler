@@ -1,5 +1,6 @@
 package services;
 
+import enums.MeetingStatus;
 import exceptions.MeetingSchedularException;
 import models.Meeting;
 import models.Room;
@@ -20,12 +21,14 @@ public class MeetingSchedularService {
     private static final Object lock = new Object();
     private Map<String, Room> rooms;// this has all the rooms
     private Map<String, List<Meeting>> roomMeetings;
+    private Map<String, Meeting> meetings;
     private RoomSelectionStrategy roomSelectionStrategy;
     private CopyOnWriteArrayList<MeetingObserver> observers;
 
     private MeetingSchedularService(){
         this.rooms = new ConcurrentHashMap<>();
         this.roomMeetings = new ConcurrentHashMap<>();
+        this.meetings = new ConcurrentHashMap<>();
         this.roomSelectionStrategy = new FirstAvailableRoomSelectionStrategy();
         this.observers = new CopyOnWriteArrayList<>();
     }
@@ -60,10 +63,25 @@ public class MeetingSchedularService {
 
         roomMeetings.computeIfAbsent(roomForMeeting.getId(),(key)-> new ArrayList<>()).add(meeting);
 
+        meetings.putIfAbsent(meeting.getId(), meeting);
+
         notifyMeetingScheduled(meeting);
 
         return meeting;
 
+    }
+
+    public synchronized void cancelMeeting(String meetingId){
+        Meeting meeting = meetings.getOrDefault(meetingId, null);
+        if(meeting == null){
+            throw new MeetingSchedularException("Meeting not found " + meetingId);
+        }
+
+        meeting.cancel();
+
+        roomMeetings.get(meeting.getRoom().getId()).remove(meeting);
+
+        notifyMeetingCancelled(meeting);
     }
 
     public List<Room> getAvailableRooms(TimeSlot slot, int capacity){
@@ -84,9 +102,11 @@ public class MeetingSchedularService {
 
     }
 
+
     public synchronized void setRoomSelectionStrategy(RoomSelectionStrategy strategy){
         this.roomSelectionStrategy = strategy;
     }
+
 
     public void addObserver(MeetingObserver observer){
         observers.add(observer);
@@ -99,6 +119,17 @@ public class MeetingSchedularService {
             }
             catch(Exception ex){
                 System.out.println("Observer notification failed " + ex.getMessage());
+            }
+        }
+    }
+
+    public void notifyMeetingCancelled(Meeting meeting){
+        for(MeetingObserver observer : observers){
+            try{
+                observer.onMeetingCancelled(meeting);
+            }
+            catch(Exception ex){
+                System.out.println("Observer notification failed ");
             }
         }
     }

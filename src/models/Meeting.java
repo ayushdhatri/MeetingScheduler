@@ -1,6 +1,7 @@
 package models;
 
 import enums.MeetingStatus;
+import exceptions.MeetingSchedularException;
 import util.IdGenerator;
 
 import java.util.List;
@@ -65,6 +66,14 @@ public class Meeting {
 
     public Room getRoom(){
         return this.room;
+    }
+
+    public void cancel(){
+        if(this.status != MeetingStatus.ACTIVE){
+            throw new MeetingSchedularException("Can only cancel SCHEDULED meetings. Current Status : " + status);
+        }
+        this.status = MeetingStatus.CANCELLED;
+
     }
 
 
